@@ -1,0 +1,28 @@
+ --Сверка CLIENT_HISTORY
+??? IPC_CLIENT_HISTORY$IX3 PASPORT
+
+select * from dba_tab_columns where (table_name = 'CLIENT_HISTORY' and owner = 'DWH') or (table_name = 'IPC_CLIENT_HISTORY' and owner = 'DWH_IPC') order by column_name, table_name, owner;
+
+select * from dba_indexes where (table_name = 'CLIENT_HISTORY' and owner = 'DWH') or (table_name = 'IPC_CLIENT_HISTORY' and owner = 'DWH_IPC') order by index_name, table_name, owner;
+
+select * from dba_ind_columns where (table_name = 'CLIENT_HISTORY' and table_owner = 'DWH') or (table_name = 'IPC_CLIENT_HISTORY' and table_owner = 'DWH_IPC') order by index_name, column_name, table_name, index_owner;
+
+select * from dba_tab_partitions where (table_name = 'CLIENT_HISTORY' and table_owner = 'DWH') or (table_name = 'IPC_CLIENT_HISTORY' and table_owner = 'DWH_IPC') order by partition_position, table_name, table_owner;
+
+drop table dwhcrt purge;
+create table dwhcrt as select * from dwh.tmp_CLIENT_HISTORY  where branch_id = 9;
+select count(*) from dwhcrt;
+drop table ipccrt purge;
+create table ipccrt as select * from dwh_ipc.ipc_CLIENT_HISTORY  where branch_id = 9;
+select count(*) from ipccrt;
+----------------------------------------------
+
+drop table diff  purge;
+create table diff as
+select  * from dwhcrt
+minus
+select   *  from ipccrt ;
+ select * from dwh.tmp_client_history where clnt_Id  = 10647543 and num_history = 770
+union 
+select * from dwh_ipc.ipc_client_history where clnt_Id  in (select clnt_Id from diff)
+order by 1,2,3

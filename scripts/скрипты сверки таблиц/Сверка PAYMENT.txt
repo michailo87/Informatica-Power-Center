@@ -1,0 +1,170 @@
+--Ñâåğêà Ëîò1
+select * from dba_tab_columns where (table_name = 'PAYMENT' and owner = 'DWH') or (table_name = 'IPC_PAYMENT' and owner = 'DWH_IPC') order by column_name, table_name;
+
+select * from dba_indexes where (table_name = 'PAYMENT' and owner = 'DWH') or (table_name = 'IPC_PAYMENT' and owner = 'DWH_IPC') order by index_name, table_name;
+
+select * from dba_ind_columns where (table_name = 'PAYMENT' and table_owner = 'DWH') or (table_name = 'IPC_PAYMENT' and table_owner = 'DWH_IPC') order by index_name, column_name, table_name;
+
+select * from dba_tab_partitions where (table_name = 'PAYMENT' and table_owner = 'DWH') or (table_name = 'IPC_PAYMENT' and table_owner = 'DWH_IPC') order by partition_position, table_name;
+
+
+
+create table paym_dwh as select /*+ parallel(16)*/ *  from dwh.PAYMENT  where pay_date >=  to_date('31.10.2015') and pay_date < to_date('01.11.2015');
+create table paym_ipc as select /*+ parallel(16)*/* from dwh_ipc.ipc_PAYMENT  where pay_date >=  to_date('31.10.2015') and pay_date < to_date('01.11.2015');
+
+
+select count(*) from paym_dwh ;--2054483
+select count(*) from paym_ipc ;--2054485
+
+select   pay_id           ,
+  pdoc_id          ,
+  clnt_bal_id      ,
+  clnt_id          ,
+  payt_id          ,
+  pay_date         ,
+  summ_$           ,
+  nsp_$            ,
+  nsp_adv_$        ,
+  curr_id          ,
+  rate             ,
+  summ_r$          ,
+  nsp_r$           ,
+  nsp_adv_r$       ,
+  
+  subs_id          ,
+  
+  chrg_id          ,
+  rate_balance     ,
+  cre_user_id      ,
+  cre_date         ,
+  del_user_id      ,
+  del_date         ,
+  dead_date        ,
+  dm_id            ,
+  pt_id            ,
+  paydt_id  from paym_dwh 
+minus
+select   pay_id           ,
+  pdoc_id          ,
+  clnt_bal_id      ,
+  clnt_id          ,
+  payt_id          ,
+  pay_date         ,
+  summ_$           ,
+  nsp_$            ,
+  nsp_adv_$        ,
+  curr_id          ,
+  rate             ,
+  summ_r$          ,
+  nsp_r$           ,
+  nsp_adv_r$       ,
+  
+  subs_id          ,
+  
+  chrg_id          ,
+  rate_balance     ,
+  cre_user_id      ,
+  cre_date         ,
+  del_user_id      ,
+  del_date         ,
+  dead_date        ,
+  dm_id            ,
+  pt_id            ,
+  paydt_id  from paym_ipc ;
+
+select   pay_id           ,
+  pdoc_id          ,
+  clnt_bal_id      ,
+  clnt_id          ,
+  payt_id          ,
+  pay_date         ,
+  summ_$           ,
+  nsp_$            ,
+  nsp_adv_$        ,
+  curr_id          ,
+  rate             ,
+  summ_r$          ,
+  nsp_r$           ,
+  nsp_adv_r$       ,
+  
+  subs_id          ,
+  
+  chrg_id          ,
+  rate_balance     ,
+  cre_user_id      ,
+  cre_date         ,
+  del_user_id      ,
+  del_date         ,
+  dead_date        ,
+  dm_id            ,
+  pt_id            ,
+  paydt_id  from paym_ipc 
+minus
+select   pay_id           ,
+  pdoc_id          ,
+  clnt_bal_id      ,
+  clnt_id          ,
+  payt_id          ,
+  pay_date         ,
+  summ_$           ,
+  nsp_$            ,
+  nsp_adv_$        ,
+  curr_id          ,
+  rate             ,
+  summ_r$          ,
+  nsp_r$           ,
+  nsp_adv_r$       ,
+  
+  subs_id          ,
+  
+  chrg_id          ,
+  rate_balance     ,
+  cre_user_id      ,
+  cre_date         ,
+  del_user_id      ,
+  del_date         ,
+  dead_date        ,
+  dm_id            ,
+  pt_id            ,
+  paydt_id  from paym_dwh ;
+
+/*select * from dwh_ipc.ipc_PAYMENT 
+minus
+select * from dwh.PAYMENT;
+--15 22
+drop table tmp_dwh_PAYMENT purge;
+drop table tmp_ipc_PAYMENT purge;
+create table tmp_dwh_PAYMENT as select * from dwh.PAYMENT  where pay_date >= to_date('10.09.2015') and pay_date < to_date('11.09.2015');
+create table tmp_ipc_PAYMENT as select * from dwh_ipc.ipc_PAYMENT where pay_date >= to_date('10.09.2015') and pay_date < to_date('11.09.2015');
+
+select count(*) from tmp_dwh_PAYMENT ;
+select count(*) from tmp_ipc_PAYMENT ;
+
+
+select * from tmp_dwh_PAYMENT
+minus
+select * from tmp_ipc_PAYMENT;
+
+select * from tmp_ipc_PAYMENT
+minus
+select * from tmp_dwh_PAYMENT;
+
+select * from tmp_dwh_PAYMENT where corr_id = 11696543
+union all
+select * from tmp_ipc_PAYMENT where corr_id = 11696543
+
+
+select 'dwh', t.PAYMENT_id, t.status_id, t.PAYMENT_date, t.dealer_id, t.num, t.summ_$, t.vat_$, t.wovat_$, t.pay_date, t.cre_user_id, t.inv_id, t.del_date, t.del_user_id, t.PAYMENT_type_id
+ from dwh.PAYMENT t where PAYMENT_id in (9669,9670,9671,9711,9729,9730,9731,9732,9733,9734,9735,9736,9737,9741,9742,9743,9744)
+union all
+select 'inv',t.PAYMENT_id, t.status_id, t.PAYMENT_date, t.dealer_id, t.num, t.summ_$, t.vat_$, t.wovat_$, t.pay_date, t.cre_user_id, t.inv_id, t.del_date, t.del_user_id, t.PAYMENT_type_id
+ from PAYMENT@berdb1 t where PAYMENT_id in (9669,9670,9671,9711,9729,9730,9731,9732,9733,9734,9735,9736,9737,9741,9742,9743,9744)
+union all
+select 'stg',t.PAYMENT_id, t.status_id, t.PAYMENT_date, t.dealer_id, t.num, t.summ_$, t.vat_$, t.wovat_$, t.pay_date, t.cre_user_id, t.inv_id, t.del_date, t.del_user_id, t.PAYMENT_type_id
+ from STAGE04.PAYMENT_S t where PAYMENT_id in (9670)
+union all
+select 'ipc',t.PAYMENT_id, t.status_id, t.PAYMENT_date, t.dealer_id, t.num, t.summ_$, t.vat_$, t.wovat_$, t.pay_date, t.cre_user_id, t.inv_id, t.del_date, t.del_user_id, t.PAYMENT_type_id
+ from dwh_ipc.ipc_PAYMENT t where  PAYMENT_id in (9669,9670,9671,9711,9729,9730,9731,9732,9733,9734,9735,9736,9737,9741,9742,9743,9744)
+order by 2,1;
+
+*/
