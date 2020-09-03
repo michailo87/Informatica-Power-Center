@@ -1,2 +1,2 @@
 # Informatica Power Center
- Scripts and Documntation
+ Scripts and Documentation
